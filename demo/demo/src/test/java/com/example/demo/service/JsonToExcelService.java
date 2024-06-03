@@ -61,7 +61,7 @@ public class JsonToExcelService {
             ExcelBackgroundFill.applyBackgroundFill(sheet, rootNode);
 
                 // Extract freeze information from JSON data
-                int freezeRows = rootNode.has("freezeRows") ? rootNode.get("freezeRows").asInt() : 0;
+                int freezeRows = rootNode.has("freezeRows") ? rootNode.get("freezeRows").asInt() : 6;
                 int freezeColumns = rootNode.has("freezeColumns") ? rootNode.get("freezeColumns").asInt() : 3;
 
                 // Freeze rows and columns

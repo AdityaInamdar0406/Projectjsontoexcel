@@ -8,14 +8,20 @@ public class ExcelBackgroundFill {
         JsonNode backgroundFillNode = rootNode.path("formatting").path("BACKGROUND_FILL");
         if (backgroundFillNode.isArray()) {
             for (JsonNode fillCondition : backgroundFillNode) {
-                String colour = fillCondition.path("COLOR").asText();
+                String colour = fillCondition.path("COLOUR").asText();
                 String column = fillCondition.has("COLUMN") ? fillCondition.path("COLUMN").asText() : null;
-                int row = fillCondition.has("ROW") && !fillCondition.path("ROW").isNull() ? fillCondition.path("ROW").asInt() : -1;
+                Integer row = fillCondition.has("ROW") && !fillCondition.path("ROW").isNull() ? fillCondition.path("ROW").asInt() : null;
                 String condition = fillCondition.path("CONDITION").asText();
 
-                if (column != null) {
+                System.out.println("Processing fill condition:");
+                System.out.println("COLOUR: " + colour);
+                System.out.println("COLUMN: " + column);
+                System.out.println("ROW: " + row);
+                System.out.println("CONDITION: " + condition);
+
+                if (column != null && row == null) {
                     applyFillToColumn(sheet, colour, column, condition);
-                } else if (row != -1) {
+                } else if (column == null && row != null) {
                     applyFillToRow(sheet, colour, row, condition);
                 }
             }
@@ -27,8 +33,12 @@ public class ExcelBackgroundFill {
         if (columnIndex != -1) {
             for (Row row : sheet) {
                 Cell cell = row.getCell(columnIndex);
-                if (cell != null && condition.equals(cell.getStringCellValue())) {
-                    applyFill(colour, cell);
+                if (cell != null) {
+                    String cellValue = cell.getStringCellValue();
+                    System.out.println("Cell value: " + cellValue);
+                    if (condition == null || condition.equals(cellValue)) {
+                        applyFill(colour, cell);
+                    }
                 }
             }
         }
@@ -38,30 +48,35 @@ public class ExcelBackgroundFill {
         Row row = sheet.getRow(rowIndex);
         if (row != null) {
             for (Cell cell : row) {
-                if (condition.equals(cell.getStringCellValue())) {
-                    applyFill(colour, cell);
+                if (cell != null) {
+                    String cellValue = cell.getStringCellValue();
+                    System.out.println("Cell value: " + cellValue);
+                    if (condition == null || condition.equals(cellValue)) {
+                        applyFill(colour, cell);
+                    }
                 }
             }
         }
     }
 
     private static void applyFill(String colour, Cell cell) {
-        CellStyle style = cell.getCellStyle();
-        if (style == null) {
-            style = cell.getSheet().getWorkbook().createCellStyle();
-        }
-        style.setFillForegroundColor(IndexedColors.valueOf(colour).getIndex());
+        Workbook workbook = cell.getSheet().getWorkbook();
+        CellStyle style = workbook.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.valueOf(colour.toUpperCase()).getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         cell.setCellStyle(style);
     }
 
     private static int getColumnIndex(Sheet sheet, String columnName) {
         Row firstRow = sheet.getRow(0);
-        for (Cell cell : firstRow) {
-            if (columnName.equals(cell.getStringCellValue())) {
-                return cell.getColumnIndex();
+        if (firstRow != null) {
+            for (Cell cell : firstRow) {
+                if (columnName.equals(cell.getStringCellValue())) {
+                    return cell.getColumnIndex();
+                }
             }
         }
         return -1; // Column not found
     }
 }
+
