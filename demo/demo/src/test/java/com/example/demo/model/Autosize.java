@@ -1,7 +1,8 @@
-
 package com.example.demo.model;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class Autosize {
 
@@ -12,7 +13,7 @@ public class Autosize {
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 sheet.autoSizeColumn(i);
                 int columnWidth = sheet.getColumnWidth(i);
-                // Set a maximum width for the column (optional)
+                // Set a maximum width for the column (optional).
                 if (columnWidth > 25000) {
                     columnWidth = 25000;    
                 }
